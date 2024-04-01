@@ -1,18 +1,9 @@
-FROM golang:1.22.1-alpine3.19
+FROM golang:1.22.1-alpine3.19 as build
+WORKDIR /usr/src/app
+COPY main.go .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /app main.go
 
-WORKDIR /usr/src/
+FROM scratch
+COPY --from=build /app /app
 
-RUN go mod init pmtelli/hello-world && \
-    touch hello-world.go
-
-RUN cat > hello-world.go <<EOF
-package main
-import "fmt"
-func main() {
-    fmt.Println("Full Cycle Rocks!!")
-}
-EOF
-
-RUN go build -o /hello-world
-
-CMD ["/hello-world"]
+CMD ["/app"]
